@@ -1,0 +1,41 @@
+# coding: utf-8
+
+import requests
+import base64
+import json
+import uuid
+import datetime
+import os
+
+
+class GithubImageHost:
+
+    @staticmethod
+    def to_base64(data):
+        return base64.b64encode(data).decode()
+
+    @classmethod
+    def upload_file(cls, file_path):
+        ext = os.path.splitext(file_path)[-1]
+        with open(file_path, 'rb') as fo:
+            file_data = cls.to_base64(fo.read())
+            return cls.send_to(file_data, ext)
+
+    @staticmethod
+    def send_to(file_data, ext):
+        dirname = 'post'
+        filename = f'{datetime.datetime.now().strftime("%Y-%m-%d")}-{uuid.uuid1()}{ext}'
+        url = f'https://api.github.com/repos/nfyn/image_host/contents/{dirname}/{filename}'
+        token = "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"
+        headers = {'Authorization': f'token {token}'}
+        data = {
+            "message": "upload pictures",
+            "content": file_data
+        }
+        req = requests.put(url=url, data=json.dumps(data), headers=headers)
+        return json.loads(req.text)
+
+
+if __name__ == '__main__':
+    a = GithubImageHost.upload_file('d:/a/1.txt')
+    print(a)
